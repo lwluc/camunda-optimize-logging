@@ -1,0 +1,13 @@
+camunda.bpm.admin-user:
+  id: admin
+  password: admin
+
+logbook:
+  include:
+    - /engine-rest/engine/*/version
+  filter.enabled: true
+  format.style: http
+
+logging:
+  level:
+    org.zalando.logbook: TRACE

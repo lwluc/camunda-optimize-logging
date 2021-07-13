@@ -1,0 +1,48 @@
+version: "3.9"
+services:
+  elasticsearch:
+    image: elasticsearch:7.10.1
+    mem_limit: 1024M
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    cap_add:
+      - IPC_LOCK
+    ports:
+      - 9200:9200
+      - 9300:9300
+    environment:
+      - discovery.type=single-node
+    volumes:
+      - ./data:/usr/share/elasticsearch/data
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    restart: always
+
+  optimize:
+    image: registry.camunda.cloud/optimize-ee/optimize:3.3.0
+    mem_limit: 512M
+    environment:
+      - OPTIMIZE_CAMUNDABPM_REST_URL=http://camunda:8080/engine-rest
+      - OPTIMIZE_ELASTICSEARCH_HOST=elasticsearch
+      - OPTIMIZE_ELASTICSEARCH_HTTP_PORT=9200
+    depends_on:
+      - camunda
+      - elasticsearch
+    volumes:
+      - ./licenses/OptimizeLicense.txt:/optimize/config/OptimizeLicense.txt:ro
+    restart: always
+    mem_limit: 2g
+    ports:
+      - 8090:8090
+      - 8091:8091
+
+  camunda:
+    build: ./camunda-demo
+    mem_limit: 512M
+    ports:
+      - 8080:8080
